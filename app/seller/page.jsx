@@ -2,8 +2,14 @@
 import React, { useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
+import { useAppContext } from "@/context/AppContext";
+import { headers } from "next/headers";
+import toast from "react-hot-toast";
+import { set } from "mongoose";
 
 const AddProduct = () => {
+
+  const {getToken} = useAppContext();
 
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
@@ -15,6 +21,37 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const dormData = new FormData();
+    FormData.append('name', name);
+    FormData.append('description', description);
+    FormData.append('category', category);
+    FormData.append('price', price);
+    FormData.append('offerPrice', offerPrice);
+
+    for (let index = 0; index < files.length; index++) {
+      formData.append('images', files[index]);
+    }
+
+    try{
+      const token = await getToken();
+
+      const {data} =await axios.post('/api/product/add', formData, {headers: {Authorization: `Bearer ${token}`}});
+      if(data.success){
+        toast.success(data.message);
+        setFiles([]);
+        setName('');
+        setDescription('');
+        setCategory('Earphone');
+        setPrice('');
+        setOfferPrice('');
+      }else{
+        toast.error(data.message);
+      }
+
+    }catch(err){
+      toast.error(err.message);
+    }
+    
   };
 
   return (
