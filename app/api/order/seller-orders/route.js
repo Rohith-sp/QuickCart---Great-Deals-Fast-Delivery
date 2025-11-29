@@ -1,7 +1,7 @@
-import User from "@/models/User";
-import connectDB from "@/config/db";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import Order from "@/models/Order";
+import connectDB from "@/config/db";
 
 export async function GET(request) {
     try {
@@ -12,17 +12,14 @@ export async function GET(request) {
         }
 
         await connectDB();
-        const user = await User.findById(userId);
 
-        if (!user) {
-            return NextResponse.json({ success: false, message: "User not found" }, { status: 404 });
-        }
+        // Get all orders (seller can see all orders for their products)
+        const orders = await Order.find({});
 
-        const { cartItems } = user;
-        return NextResponse.json({ success: true, cartItems });
-    }
-    catch (error) {
-        console.error("Error fetching cart:", error);
+        return NextResponse.json({ success: true, orders }, { status: 200 });
+
+    } catch (error) {
+        console.error("Error fetching seller orders:", error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

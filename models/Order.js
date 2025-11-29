@@ -28,6 +28,12 @@ const orderSchema = new mongoose.Schema({
         required: true,
     }
 })
-const Order = mongoose.models.order || mongoose.model("order", orderSchema)
 
-export default Order
+// Delete the cached model to force reload with new schema
+if (mongoose.models.Order) {
+    delete mongoose.models.Order;
+}
+
+const Order = mongoose.model("Order", orderSchema);
+
+export default Order;

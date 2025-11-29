@@ -1,6 +1,5 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { v2 as cloudinary } from "cloudinary";
-import authSeller from "@/lib/authSeller";
 import { NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import Product from "@/models/Product";
@@ -14,11 +13,12 @@ cloudinary.config({
 
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request);
-    const isSeller = await authSeller(userId);
-    if (!isSeller) {
-      return NextResponse.json({ success: false, message: "Unauthorized! You are not a seller" });
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json({ success: false, message: "Unauthorized! Please log in" }, { status: 401 });
     }
+
     const formData = await request.formData();
 
     const name = formData.get("name");
@@ -29,7 +29,7 @@ export async function POST(request) {
     const files = formData.getAll("images");
 
     if (!files || files.length === 0) {
-      return NextResponse.json({ success: false, message: "Please provide product images" });
+      return NextResponse.json({ success: false, message: "Please provide product images" }, { status: 400 });
     }
 
     const result = await Promise.all(
@@ -61,7 +61,7 @@ export async function POST(request) {
       description,
       price: Number(price),
       offerPrice: Number(offerPrice),
-      image,
+      image: images,
       category,
       date: Date.now()
     };
@@ -69,10 +69,10 @@ export async function POST(request) {
     await connectDB();
     const newProduct = await Product.create(productData);
 
-    return NextResponse.json({ success: true, message: "Product added successfully",newProduct });  
+    return NextResponse.json({ success: true, message: "Product added successfully", newProduct });
   }
   catch (err) {
-    console.error(err);
-    return NextResponse.json({ success: false, message: "Error adding product" });
+    console.error("Error adding product:", err);
+    return NextResponse.json({ success: false, message: err.message || "Error adding product" }, { status: 500 });
   }
 }

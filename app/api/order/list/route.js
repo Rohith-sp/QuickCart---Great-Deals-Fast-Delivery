@@ -1,7 +1,7 @@
+import Order from "@/models/Order";
 import connectDB from "@/config/db";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import Address from "@/models/Address";
 
 export async function GET(request) {
     try {
@@ -12,10 +12,11 @@ export async function GET(request) {
         }
 
         await connectDB();
-        const addresses = await Address.find({ userId });
-        return NextResponse.json({ success: true, addresses });
+        const orders = await Order.find({ userId });
+        return NextResponse.json({ success: true, orders }, { status: 200 })
+
     } catch (error) {
-        console.error("Error fetching addresses:", error);
+        console.error("Error fetching orders:", error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 })
     }
 }
