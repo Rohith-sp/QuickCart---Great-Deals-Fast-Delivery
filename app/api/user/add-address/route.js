@@ -1,11 +1,11 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/mongodb";
+import connectDB from "@/config/db";
 import Address from "@/models/Address";
 
 export async function POST(request) {
     try {
-        const { userId } = getAuth(request);
+        const { userId } = auth();
         const { address } = await request.json();
         await connectDB();
         const newAddress = await Address.create({

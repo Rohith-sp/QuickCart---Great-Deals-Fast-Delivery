@@ -3,13 +3,13 @@ import React, { useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
-import { headers } from "next/headers";
+
 import toast from "react-hot-toast";
 import { set } from "mongoose";
 
 const AddProduct = () => {
 
-  const {getToken} = useAppContext();
+  const { getToken } = useAppContext();
 
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
@@ -32,11 +32,11 @@ const AddProduct = () => {
       formData.append('images', files[index]);
     }
 
-    try{
+    try {
       const token = await getToken();
 
-      const {data} =await axios.post('/api/product/add', formData, {headers: {Authorization: `Bearer ${token}`}});
-      if(data.success){
+      const { data } = await axios.post('/api/product/add', formData, { headers: { Authorization: `Bearer ${token}` } });
+      if (data.success) {
         toast.success(data.message);
         setFiles([]);
         setName('');
@@ -44,14 +44,14 @@ const AddProduct = () => {
         setCategory('Earphone');
         setPrice('');
         setOfferPrice('');
-      }else{
+      } else {
         toast.error(data.message);
       }
 
-    }catch(err){
+    } catch (err) {
       toast.error(err.message);
     }
-    
+
   };
 
   return (
